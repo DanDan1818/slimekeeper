@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.391</title>
+    <title>SlimeHearth v0.393</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -523,8 +523,8 @@
          style="position:fixed;top:0;left:0;width:100%;height:100%;background-image:url('./slimehearth-assets/images/titlescreen-background.png');background-size:cover;background-position:center;background-repeat:no-repeat;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;"
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
-        <p style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:20px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.381</div>
+        <p style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:200px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.393</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -1191,7 +1191,7 @@
         <source src="./slimehearth-assets/music/fishing-lights.mp3" type="audio/mpeg">
     </audio>
     <audio id="bg-music" loop>
-        <source src="./slimekeeper-assets/music/fishing-lights.mp3" type="audio/mpeg">
+        <source src="./slimehearth-assets/music/fishing-lights.mp3" type="audio/mpeg">
     </audio>
     <div id="debug-console" style="position:fixed;top:70px;left:10px;width:250px;height:400px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:11px;padding:10px;overflow-y:auto;z-index:500;border:2px solid #0f0;border-radius:5px;display:none;"><div style="color:#fff;font-weight:bold;margin-bottom:5px;">DEBUG CONSOLE</div><div id="debug-log"></div></div>
     <!-- Notifications -->
@@ -1659,11 +1659,11 @@
         }
         
         function save() {
-            localStorage.setItem('slimeKeeper', JSON.stringify(gs));
+            localStorage.setItem('slimeHearth', JSON.stringify(gs));
         }
         
         function load() {
-            const saved = localStorage.getItem('slimeKeeper');
+            const saved = localStorage.getItem('slimeHearth');
             if (saved) {
                 Object.assign(gs, JSON.parse(saved));
                 
@@ -2397,8 +2397,8 @@
                 console.log(`🐟 Rendering ${itemId} with image:`, ITEM_IMAGES[itemId]);
                 renderOptions.sprite = {
                     texture: ITEM_IMAGES[itemId],
-                    xScale: 0.15,  // Much smaller to fit 40x40 box
-                    yScale: 0.15
+                    xScale: 0.075,  // Half of 0.15
+                    yScale: 0.075
                 };
             } else {
                 console.log(`📦 Rendering ${itemId} as colored box`);
@@ -4577,7 +4577,8 @@ function initKitchenGame() {
                 if (confirmed1) {
                     const confirmed2 = confirm('🚨 FINAL WARNING: All your progress will be lost! Continue?');
                     if (confirmed2) {
-                        localStorage.removeItem('slimekeeper_save');
+                        // Clear ALL localStorage (safer than targeting specific keys)
+                        localStorage.clear();
                         notify('🔄 Game Reset! Reloading...', 'achievement');
                         setTimeout(() => location.reload(), 1000);
                     }
