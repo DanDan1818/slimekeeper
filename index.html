@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.389</title>
+    <title>SlimeHearth v0.390</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -2394,11 +2394,14 @@
             // Use image for fish types if available
             const itemData = ITEM_DATA[itemId];
             if (itemData && itemData.image && ITEM_IMAGES[itemId]) {
+                console.log(`🐟 Rendering ${itemId} with image:`, ITEM_IMAGES[itemId]);
                 renderOptions.sprite = {
                     texture: ITEM_IMAGES[itemId],
                     xScale: 0.5,
                     yScale: 0.5
                 };
+            } else {
+                console.log(`📦 Rendering ${itemId} as colored box`);
             }
             
             const box = Bodies.rectangle(x, y, 40, 40, {
@@ -5191,6 +5194,30 @@ function initKitchenGame() {
             
             display.appendChild(waterDoor);
         }
+        
+        
+        // ===== PRELOAD FISH IMAGES FOR MATTER.JS =====
+        // Matter.js sprite textures just need the image URL/path, not the Image object
+        // The images will be loaded by Matter's renderer when needed
+        
+        function preloadFishImages() {
+            // Just verify the images exist by attempting to load them
+            const fishImagesToLoad = ['fish1', 'fish2', 'fish3', 'fish4'];
+            
+            fishImagesToLoad.forEach(fishId => {
+                const img = new Image();
+                img.onload = () => {
+                    console.log(`✅ Fish image verified: ${fishId}.png`);
+                };
+                img.onerror = () => {
+                    console.error(`❌ Failed to load ${fishId}.png - check file path!`);
+                };
+                img.src = ITEM_IMAGES[fishId];
+            });
+        }
+        
+        // Verify images on page load
+        preloadFishImages();
         
 // ===== INIT =====
         load();
