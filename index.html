@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.388</title>
+    <title>SlimeHearth v0.389</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1255,7 +1255,11 @@
         };
         
         const ITEM_IMAGES = {
-            'fish': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAA8ADwDASIAAhEBAxEB/8QAGgABAAMBAQEAAAAAAAAAAAAAAAQFBgEDAv/EAC8QAAIBAwMBBwIGAwAAAAAAAAECAwAEEQUSITEiQVFhcYGRE7EUMjNSofBC0uH/xAAZAQADAQEBAAAAAAAAAAAAAAAAAwQCAQX/xAApEQACAQMCBQIHAAAAAAAAAAABAgADERIhMQQTIkFRgfAUMmGhsdHh/9oADAMBAAIRAxEAPwDGUpXVUswVQSxOAB1NEJyu7TtLYO0HBPd/eKsLXS3Y/UvQ0EG0ncSAT7f8q1hgswmI1t0OeAyh29yTx6UlqyqZhWao2NIX/EzNK0F1p8NwGjjSKK4BG1lyqsPSqB0aN2RxhlJBHnWqdQPtAN1FWFiO05SlKZNxWj0y2W1t1YlUldd8kjf4L3dft5elQtHso3JkmRZMquwMeBuYrz8VbXNk11HdwxyoXSQd23cAB0HzUtU5nEbRapz3K26V3+p8S0tHtFVZbQCRsdp5AH3H17q872JLgs0qJhuuFAFQIXu7O3ee4JnkcquCQMADA6e1LyW6uLeKeCBSMsGjkG4dMA4+amKsz2DdN956iWppkFkqfT420yK5t2CSRuomQHKnng+WeOnjVcdMtbm7JMTfWbmRGchVJOck/bHXwr306Oe0sJY5UbEyEIuPTHXpyDUi5coYFIaOcIyyIRg4B7J+Ceac99SNx7+8mfhlrMpJI9e3j0MiaroEdpFsaKPe6MY2iY/mAzg5/vWsrWw1OeaTdvY4jtmMPmccn16Vj6dRbK5EkCcuoyeLSXp97+DlbegeKQbXXHOPKrm0mjnkd7Z5GkABaORgSR3EHxGe/wBDWboCVIKkgjkEd1dekG1ncWVs6Zsfe82CXSuDG2G8UYYPuDXoszySxQQp2nYADHCjvPoBWbXV5ypE4jm/aHjB+2MV9tqUSoGS1g3t1GWOPUdP5qYcPY6iVfHVMbFNfIP7mg1K4iiu1WKb6yRoBKDIAc+IPTPj7V4398l1cR3E7/QkKKsMS9s7T+4d+aphq57eUiAX9ICAf7cfzUC5uZLqZpZmyx+APAU7BmJ0tJWq1qth8tu9/wCTQ6rqwdCLiRmlEbLGqwGMLkYzzyelZmlKcq47m84iY6k3MUpStxkUpSiEUpSiEUpSiE//2Q=='
+            'fish': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAA8ADwDASIAAhEBAxEB/8QAGgABAAMBAQEAAAAAAAAAAAAAAAQFBgEDAv/EAC8QAAIBAwMBBwIGAwAAAAAAAAECAwAEEQUSITEiQVFhcYGRE7EUMjNSofBC0uH/xAAZAQADAQEBAAAAAAAAAAAAAAAAAwQCAQX/xAApEQACAQMCBQIHAAAAAAAAAAABAgADERIhMQQTIkFRgfAUMmGhsdHh/9oADAMBAAIRAxEAPwDGUpXVUswVQSxOAB1NEJyu7TtLYO0HBPd/eKsLXS3Y/UvQ0EG0ncSAT7f8q1hgswmI1t0OeAyh29yTx6UlqyqZhWao2NIX/EzNK0F1p8NwGjjSKK4BG1lyqsPSqB0aN2RxhlJBHnWqdQPtAN1FWFiO05SlKZNxWj0y2W1t1YlUldd8kjf4L3dft5elQtHso3JkmRZMquwMeBuYrz8VbXNk11HdwxyoXSQd23cAB0HzUtU5nEbRapz3K26V3+p8S0tHtFVZbQCRsdp5AH3H17q872JLgs0qJhuuFAFQIXu7O3ee4JnkcquCQMADA6e1LyW6uLeKeCBSMsGjkG4dMA4+amKsz2DdN956iWppkFkqfT420yK5t2CSRuomQHKnng+WeOnjVcdMtbm7JMTfWbmRGchVJOck/bHXwr306Oe0sJY5UbEyEIuPTHXpyDUi5coYFIaOcIyyIRg4B7J+Ceac99SNx7+8mfhlrMpJI9e3j0MiaroEdpFsaKPe6MY2iY/mAzg5/vWsrWw1OeaTdvY4jtmMPmccn16Vj6dRbK5EkCcuoyeLSXp97+DlbegeKQbXXHOPKrm0mjnkd7Z5GkABaORgSR3EHxGe/wBDWboCVIKkgjkEd1dekG1ncWVs6Zsfe82CXSuDG2G8UYYPuDXoszySxQQp2nYADHCjvPoBWbXV5ypE4jm/aHjB+2MV9tqUSoGS1g3t1GWOPUdP5qYcPY6iVfHVMbFNfIP7mg1K4iiu1WKb6yRoBKDIAc+IPTPj7V4398l1cR3E7/QkKKsMS9s7T+4d+aphq57eUiAX9ICAf7cfzUC5uZLqZpZmyx+APAU7BmJ0tJWq1qth8tu9/wCTQ6rqwdCLiRmlEbLGqwGMLkYzzyelZmlKcq47m84iY6k3MUpStxkUpSiEUpSiEUpSiE//2Q==',
+            'fish1': './slimehearth-assets/images/fish1.png',
+            'fish2': './slimehearth-assets/images/fish2.png',
+            'fish3': './slimehearth-assets/images/fish3.png',
+            'fish4': './slimehearth-assets/images/fish4.png'
         };
         
         const ITEM_DATA = {
@@ -2387,12 +2391,13 @@
             
             const renderOptions = { fillStyle: color };
             
-            // Use image for fish
-            if (itemId === 'fish' && typeof ITEM_IMAGES !== 'undefined' && ITEM_IMAGES.fish) {
+            // Use image for fish types if available
+            const itemData = ITEM_DATA[itemId];
+            if (itemData && itemData.image && ITEM_IMAGES[itemId]) {
                 renderOptions.sprite = {
-                    texture: ITEM_IMAGES.fish,
-                    xScale: 0.7,
-                    yScale: 0.7
+                    texture: ITEM_IMAGES[itemId],
+                    xScale: 0.5,
+                    yScale: 0.5
                 };
             }
             
