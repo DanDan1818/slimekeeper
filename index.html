@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.395</title>
+    <title>SlimeHearth v0.397</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -538,7 +538,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.395</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.397</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -674,7 +674,7 @@
         <!-- Left: Slime Name -->
         <div class="stat-display" style="flex:1;text-align:left;padding-left:15px;">
             <div style="font-size:16px;font-weight:bold;color:#4dabf7;" id="slime-name-display">Slime</div>
-            <div style="font-size:10px;color:#999;">Your Slime</div>
+            <div style="font-size:10px;color:#999;" id="slime-subtitle">Your Slime</div>
         </div>
         
         <!-- Middle: Slime Level (Clickable) -->
@@ -1221,6 +1221,7 @@
         // ===== GAME STATE =====
         const gs = {
             hatched: false,
+            slimeName: 'Slime', // Default name
             hunger: 100,
             level: 1,
             slimeXP: 0,
@@ -1256,7 +1257,6 @@
             'fish2': '#4ade80',
             'fish3': '#fbbf24',
             'fish4': '#a855f7',
-            'fish': '#4dd0e1',
             'carrot': '#ffaa44',
             'carrot_seeds': '#8bc34a',
             'food': '#ff6b9d',
@@ -1269,7 +1269,6 @@
         };
         
         const ITEM_IMAGES = {
-            'fish': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAA8ADwDASIAAhEBAxEB/8QAGgABAAMBAQEAAAAAAAAAAAAAAAQFBgEDAv/EAC8QAAIBAwMBBwIGAwAAAAAAAAECAwAEEQUSITEiQVFhcYGRE7EUMjNSofBC0uH/xAAZAQADAQEBAAAAAAAAAAAAAAAAAwQCAQX/xAApEQACAQMCBQIHAAAAAAAAAAABAgADERIhMQQTIkFRgfAUMmGhsdHh/9oADAMBAAIRAxEAPwDGUpXVUswVQSxOAB1NEJyu7TtLYO0HBPd/eKsLXS3Y/UvQ0EG0ncSAT7f8q1hgswmI1t0OeAyh29yTx6UlqyqZhWao2NIX/EzNK0F1p8NwGjjSKK4BG1lyqsPSqB0aN2RxhlJBHnWqdQPtAN1FWFiO05SlKZNxWj0y2W1t1YlUldd8kjf4L3dft5elQtHso3JkmRZMquwMeBuYrz8VbXNk11HdwxyoXSQd23cAB0HzUtU5nEbRapz3K26V3+p8S0tHtFVZbQCRsdp5AH3H17q872JLgs0qJhuuFAFQIXu7O3ee4JnkcquCQMADA6e1LyW6uLeKeCBSMsGjkG4dMA4+amKsz2DdN956iWppkFkqfT420yK5t2CSRuomQHKnng+WeOnjVcdMtbm7JMTfWbmRGchVJOck/bHXwr306Oe0sJY5UbEyEIuPTHXpyDUi5coYFIaOcIyyIRg4B7J+Ceac99SNx7+8mfhlrMpJI9e3j0MiaroEdpFsaKPe6MY2iY/mAzg5/vWsrWw1OeaTdvY4jtmMPmccn16Vj6dRbK5EkCcuoyeLSXp97+DlbegeKQbXXHOPKrm0mjnkd7Z5GkABaORgSR3EHxGe/wBDWboCVIKkgjkEd1dekG1ncWVs6Zsfe82CXSuDG2G8UYYPuDXoszySxQQp2nYADHCjvPoBWbXV5ypE4jm/aHjB+2MV9tqUSoGS1g3t1GWOPUdP5qYcPY6iVfHVMbFNfIP7mg1K4iiu1WKb6yRoBKDIAc+IPTPj7V4398l1cR3E7/QkKKsMS9s7T+4d+aphq57eUiAX9ICAf7cfzUC5uZLqZpZmyx+APAU7BmJ0tJWq1qth8tu9/wCTQ6rqwdCLiRmlEbLGqwGMLkYzzyelZmlKcq47m84iY6k3MUpStxkUpSiEUpSiEUpSiE//2Q==',
             'fish1': './slimehearth-assets/images/fish1.png',
             'fish2': './slimehearth-assets/images/fish2.png',
             'fish3': './slimehearth-assets/images/fish3.png',
@@ -1322,16 +1321,6 @@
                 description: 'A legendary golden fish!',
                 foodValue: 20,
                 sellValue: 20,
-                cookable: true,
-                feedable: true
-            },
-            'fish': {
-                name: 'Fish',
-                rarity: 'Uncommon',
-                rarityColor: '#4ade80',
-                description: 'A fresh catch from the pond.',
-                foodValue: 10,
-                sellValue: 5,
                 cookable: true,
                 feedable: true
             },
@@ -1736,8 +1725,20 @@
             
             // Update slime name display
             const slimeNameDisplay = document.getElementById('slime-name-display');
+            const slimeSubtitle = document.getElementById('slime-subtitle');
             if (slimeNameDisplay && gs.slimeName) {
                 slimeNameDisplay.textContent = gs.slimeName;
+            }
+            if (slimeSubtitle) {
+                // Show slime type based on variant
+                const slimeTypes = {
+                    'slime1.png': 'Blue Slime',
+                    'slime2.png': 'Orange Slime',
+                    'slime3.png': 'Green Slime',
+                    'slime4.png': 'Yellow Slime',
+                    'slime5.png': 'Pink Slime'
+                };
+                slimeSubtitle.textContent = gs.slimeVariant ? slimeTypes[gs.slimeVariant] : 'Your Slime';
             }
             
             document.getElementById('level-display').textContent = gs.level;
@@ -4015,7 +4016,7 @@ function stopBasket() {
                     info.style.color = '#4ade80';
                 } else {
                     info.textContent = `${chance}% chance to level up with Small Geode`;
-                    info.style.color = '#666';
+                    info.style.color = '#fff';
                 }
             }
         }
@@ -4433,8 +4434,6 @@ function initKitchenGame() {
             slimeElement.style.backgroundImage = `url('${imagePath}')`;
             slimeElement.classList.add('visible');
             
-            notify('🎉 Your slime has hatched!');
-            
             // Check if image loaded
             setTimeout(() => {
                 const img = new Image();
@@ -4447,6 +4446,20 @@ function initKitchenGame() {
                 };
                 img.src = imagePath;
             }, 500);
+            
+            // Prompt for slime name
+            setTimeout(() => {
+                const name = prompt('🎉 Your slime has hatched!\n\nWhat would you like to name your slime?', 'Slime');
+                if (name && name.trim() !== '') {
+                    gs.slimeName = name.trim();
+                    notify(`Meet ${gs.slimeName}! 🎉`);
+                } else {
+                    gs.slimeName = 'Slime';
+                    notify('🎉 Your slime has hatched!');
+                }
+                save();
+                updateUI();
+            }, 600);
             
             save();
             updateUI();
