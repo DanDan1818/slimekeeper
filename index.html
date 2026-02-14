@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.404</title>
+    <title>SlimeHearth v0.408</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,7 +34,7 @@
             width: 100%;
             max-width: 700px;
             height: 60px;
-            background: rgba(255,255,255,0.95);
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             border-bottom: 3px solid #333;
             display: flex;
             justify-content: space-around;
@@ -150,7 +150,7 @@
             width: 100%;
             max-width: 700px;
             height: 72px;
-            background: rgba(255,255,255,0.95);
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             border-top: 3px solid #333;
             display: flex;
             justify-content: space-around;
@@ -531,7 +531,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.404</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.408</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -666,7 +666,11 @@
         
         <!-- Right: Skills Button -->
         <div style="flex:1;text-align:right;padding-right:15px;">
-            <button id="skills-btn" style="padding:8px 14px;font-size:13px;background:#9c27b0;color:#fff;border:3px solid #fff;border-radius:8px;font-weight:bold;box-shadow:0 2px 6px rgba(156,39,176,0.4);cursor:pointer;">📊 Skills</button>
+            <button id="skills-btn" style="padding:4px 8px;font-size:11px;background:#9c27b0;color:#fff;border:2px solid #fff;border-radius:6px;font-weight:bold;box-shadow:0 2px 4px rgba(156,39,176,0.3);cursor:pointer;">📊 Skills</button>
+            <div id="last-skill-display" style="font-size:9px;color:#666;margin-top:1px;font-weight:bold;"></div>
+            <div style="width:80px;height:4px;background:#ddd;border:1px solid #999;border-radius:2px;overflow:hidden;margin:1px 0 0 auto;">
+                <div id="last-skill-xp-bar" style="height:100%;width:0%;background:#9c27b0;transition:width 0.3s;"></div>
+            </div>
         </div>
     </div>
     
@@ -1217,6 +1221,7 @@
                 farming: { level: 1, xp: 0, xpNeeded: 100 },
                 cooking: { level: 1, xp: 0, xpNeeded: 100 }
             },
+            lastSkillUsed: null, // Track the last skill that gained XP
             stats: { // Permanent buffs from eating food
                 doubleXpChance: 0, // % chance for double XP (0-100)
                 doubleLootChance: 0, // % chance for double loot drops (0-100)
@@ -1752,6 +1757,9 @@
             if (hatchBtn) {
                 hatchBtn.style.display = gs.hatched ? 'none' : 'block';
             }
+            
+            // Update last skill display
+            updateLastSkillDisplay();
         }
         
         function addSkillXP(skillName, amount) {
@@ -1775,6 +1783,10 @@
             
             skill.xp += amount;
             console.log(skillName + ' XP:', skill.xp + '/' + skill.xpNeeded);
+            
+            // Track last skill used
+            gs.lastSkillUsed = skillName;
+            updateLastSkillDisplay();
             
             // Level up check
             while (skill.xp >= skill.xpNeeded) {
@@ -1811,6 +1823,39 @@
                     barEl.style.width = percent + '%';
                 }
             });
+        }
+        
+        function updateLastSkillDisplay() {
+            const display = document.getElementById('last-skill-display');
+            if (!display || !gs.lastSkillUsed) return;
+            
+            const skill = gs.skills[gs.lastSkillUsed];
+            if (!skill) return;
+            
+            const skillIcons = {
+                'fishing': '🎣',
+                'farming': '🌾',
+                'cooking': '🍳'
+            };
+            
+            const icon = skillIcons[gs.lastSkillUsed] || '';
+            const name = gs.lastSkillUsed.charAt(0).toUpperCase() + gs.lastSkillUsed.slice(1);
+            display.textContent = `${icon} ${name} Lv ${skill.level}`;
+            
+            // Update XP bar
+            const xpBar = document.getElementById('last-skill-xp-bar');
+            if (xpBar) {
+                const percent = (skill.xp / skill.xpNeeded) * 100;
+                xpBar.style.width = percent + '%';
+                
+                // Color based on skill
+                const skillColors = {
+                    'fishing': '#4dd0e1',
+                    'farming': '#8bc34a',
+                    'cooking': '#ff9800'
+                };
+                xpBar.style.background = skillColors[gs.lastSkillUsed] || '#9c27b0';
+            }
         }
         
         function addItem(itemId, quantity = 1) {
