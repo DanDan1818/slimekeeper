@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.409</title>
+    <title>SlimeHearth v0.414</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -83,34 +83,24 @@
             justify-content: center;
         }
         
-        #shop-room.active {
-            justify-content: flex-start;
-            padding-top: 10px;
-        }
-        
-        #area-room.active {
-            justify-content: flex-start;
-            padding-top: 40px;
-        }
-        
         /* Room Backgrounds */
         #shop-room {
             background-image: url('./slimehearth-assets/images/shop-background.png');
+        }
+        
+        #hearth-room {
+            background-image: url('./slimehearth-assets/images/hearth-background.png');
         }
         
         #shack-room {
             background-image: url('./slimehearth-assets/images/shack-background.png');
         }
         
-        #fishing-pond-room {
+        #pond-room {
             background-image: url('./slimehearth-assets/images/pond-background.png');
         }
         
-        #cooking-menu-room {
-            background-image: url('./slimehearth-assets/images/hearth-background.png');
-        }
-        
-        #farming-garden-room, #farming-field-room {
+        #garden-room, #field-room {
             background-image: url('./slimehearth-assets/images/farm-background.png');
         }
         
@@ -524,15 +514,6 @@
                 left: 10px !important;
             }
         }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.05); }
-        }
-        
-        .pulse-text {
-            animation: pulse 2s ease-in-out infinite;
-        }
     </style>
 </head>
 <body>
@@ -542,8 +523,8 @@
          style="position:fixed;top:0;left:0;width:100%;height:100%;background-image:url('./slimehearth-assets/images/titlescreen-background.png');background-size:cover;background-position:center;background-repeat:no-repeat;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;"
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
-        <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.409</div>
+        <p style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:20px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.414</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -596,10 +577,7 @@
                     hatchEgg.textContent = '💥';
                     
                     setTimeout(() => {
-                        console.log('10 taps reached! Checking for hatchSlime...');
-                        console.log('window.hatchSlime exists?', typeof window.hatchSlime);
-                        
-                        // Don't hide overlay here - let hatchSlime handle it
+                        hatchOverlay.style.display = 'none';
                         
                         // Start music
                         const bgMusic = document.getElementById('bg-music');
@@ -610,10 +588,7 @@
                         
                         // Hatch the slime
                         if (typeof window.hatchSlime === 'function') {
-                            console.log('Calling hatchSlime...');
                             window.hatchSlime();
-                        } else {
-                            console.error('hatchSlime function not found!');
                         }
                     }, 500);
                 }
@@ -625,112 +600,6 @@
                 tapEgg();
             }, {passive: false});
         })();
-        
-        // ===== GAME STATE (defined early so hatchSlime can use it) =====
-        window.gs = {
-            hatched: false,
-            slimeName: 'Slime', // Default name
-            hunger: 100,
-            level: 1,
-            slimeXP: 0,
-            slimeXPNeeded: 100,
-            coins: 0,
-            inventory: {}, // Format: { 'fish_0': 1, 'carrot_1': 1 }
-            itemCounter: 0, // For unique item keys
-            tools: {}, // Format: { 'fishing_rod': true, 'better_net': true }
-            prospectingLevel: 1, // Prospecting skill (levels up by cracking geodes)
-            hats: {}, // Format: { 'top_hat': true, 'party_hat': true }
-            equippedHat: null, // Currently equipped hat (null = no hat)
-            keys: {}, // Format: { 'bronze_key': true, 'silver_key': true }
-            skills: { // Skill levels and XP
-                fishing: { level: 1, xp: 0, xpNeeded: 100 },
-                farming: { level: 1, xp: 0, xpNeeded: 100 },
-                cooking: { level: 1, xp: 0, xpNeeded: 100 }
-            },
-            stats: { // Permanent buffs from eating food
-                doubleXpChance: 0, // % chance for double XP (0-100)
-                doubleLootChance: 0, // % chance for double loot drops (0-100)
-                bonusGeodeChance: 0, // % bonus chance for geodes from cracking (0-100)
-                rareFindChance: 0, // % bonus chance for rare item drops (0-100)
-                foodsEaten: 0 // Total foods consumed
-            }
-        };
-        const gs = window.gs; // Also make it available as local const
-        
-        // Define hatchSlime early so egg tap can use it
-        window.hatchSlime = function() {
-            console.log('Hatching slime');
-            
-            // Wait for gs to be defined if it's not ready yet
-            if (typeof gs === 'undefined') {
-                console.error('Game state not ready yet, retrying in 100ms...');
-                setTimeout(window.hatchSlime, 100);
-                return;
-            }
-            
-            // Randomly select one of 5 slimes (equal chances)
-            const slimeVariants = [
-                'slime1.png',    // Blue slime
-                'slime2.png',    // Orange/red slime
-                'slime3.png',    // Green slime
-                'slime4.png',    // Yellow slime
-                'slime5.png'     // Pink slime
-            ];
-            
-            const randomIndex = Math.floor(Math.random() * slimeVariants.length);
-            const chosenSlime = slimeVariants[randomIndex];
-            
-            // Prompt for slime name FIRST (before hiding overlay)
-            const name = prompt('🎉 Your slime has hatched!\n\nWhat would you like to name your slime?', 'Slime');
-            if (name && name.trim() !== '') {
-                gs.slimeName = name.trim();
-            } else {
-                gs.slimeName = 'Slime';
-            }
-            
-            // NOW hide the hatch overlay
-            const hatchOverlay = document.getElementById('hatch-overlay');
-            if (hatchOverlay) {
-                hatchOverlay.style.display = 'none';
-            }
-            
-            // Save which slime was chosen
-            gs.hatched = true;
-            gs.slimeVariant = chosenSlime;
-            
-            // Set the slime image
-            const slimeElement = document.getElementById('slime-square');
-            const imagePath = `./slimehearth-assets/images/${chosenSlime}`;
-            console.log('Trying to load slime image from:', imagePath);
-            if (slimeElement) {
-                slimeElement.style.backgroundImage = `url('${imagePath}')`;
-                slimeElement.classList.add('visible');
-            }
-            
-            // Show welcome notification
-            if (typeof notify === 'function') {
-                notify(`Meet ${gs.slimeName}! 🎉`);
-            }
-            
-            // Check if image loaded
-            setTimeout(() => {
-                const img = new Image();
-                img.onload = () => {
-                    console.log('✅ Slime image loaded successfully!');
-                };
-                img.onerror = () => {
-                    console.error('❌ Failed to load slime image!');
-                    if (typeof notify === 'function') {
-                        notify('⚠️ Can\'t load slime images. Files may be missing or browser blocking local files.');
-                    }
-                };
-                img.src = imagePath;
-            }, 500);
-            
-            // Save and update (these functions will be defined later)
-            if (typeof save === 'function') save();
-            if (typeof updateUI === 'function') updateUI();
-        };
     </script>
     
     <style>
@@ -765,6 +634,7 @@
         <!-- Left: Slime Name -->
         <div class="stat-display" style="flex:1;text-align:left;padding-left:15px;">
             <div style="font-size:16px;font-weight:bold;color:#4dabf7;" id="slime-name-display">Slime</div>
+            <div style="font-size:10px;color:#999;">Your Slime</div>
         </div>
         
         <!-- Middle: Slime Level (Clickable) -->
@@ -1003,6 +873,61 @@
                 <button id="back-to-area-cook" style="background:#999;margin-top:20px;">← Back</button>
             </div>
             
+            <!-- Cooking - The Kitchen (Rhythm Game) -->
+            <div class="room" id="cooking-kitchen-room">
+                <h2>🔥 The Kitchen</h2>
+                
+                <div style="text-align:center;max-width:400px;margin:0 auto;">
+                    <p style="margin-bottom:20px;">Click the spoon when it flashes!</p>
+                    
+                    <!-- Ingredient Slot and Spoon -->
+                    <div style="display:flex;gap:30px;align-items:center;justify-content:center;margin:30px 0;">
+                        <!-- Ingredient Slot (LEFT) -->
+                        <div style="text-align:center;">
+                            <div style="font-size:12px;margin-bottom:5px;font-weight:bold;">Ingredient</div>
+                            <button id="kitchen-ingredient-slot" style="width:100px;height:100px;border:4px dashed #999;background:#fff;border-radius:12px;font-size:50px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                                <span id="kitchen-slot-icon">+</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Spoon (RIGHT) -->
+                        <div style="text-align:center;">
+                            <div style="font-size:12px;margin-bottom:5px;font-weight:bold;">Stir!</div>
+                            <button id="stir-kitchen-btn" style="width:100px;height:100px;border:4px solid #ff6b6b;background:#ffe0e0;border-radius:12px;font-size:60px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                                <span id="kitchen-spoon">🥄</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Score -->
+                    <div id="kitchen-score-display" style="font-size:20px;font-weight:bold;margin:15px 0;">Score: 0 / 5</div>
+                    
+                    <!-- Result -->
+                    <div id="kitchen-result" style="min-height:30px;font-size:16px;font-weight:bold;margin:15px 0;"></div>
+                </div>
+                
+                <button id="leave-kitchen" style="background:#999;margin-top:20px;">← Leave</button>
+            </div>
+            
+            <!-- Cooking - The Grill (Temperature Control) -->
+            <div class="room" id="cooking-grill-room">
+                <h2>🍖 The Grill</h2>
+                <div id="cooking-game-grill">
+                    <div style="font-size:18px;margin-bottom:10px;">Keep temperature in the green zone!</div>
+                    <div id="grill-temp-container" style="width:300px;height:50px;background:#ddd;border:3px solid #333;border-radius:8px;position:relative;margin:20px auto;">
+                        <div id="grill-temp-bar" style="position:absolute;left:0;height:100%;width:50%;background:#ff6b6b;transition:width 0.3s;"></div>
+                        <div id="grill-temp-green" style="position:absolute;left:40%;width:20%;height:100%;background:rgba(76,175,80,0.5);border:2px solid #4caf50;"></div>
+                    </div>
+                    <div id="grill-temp-display" style="font-size:24px;font-weight:bold;margin:10px;">Temp: 50%</div>
+                    <div style="display:flex;gap:10px;justify-content:center;margin:15px;">
+                        <button id="grill-heat-up" style="width:120px;background:#ff5722;">🔥 Heat Up</button>
+                        <button id="grill-cool-down" style="width:120px;background:#2196f3;">❄️ Cool Down</button>
+                    </div>
+                    <div id="grill-timer-display" style="font-size:20px;margin:10px;">Time: 10.0s</div>
+                    <div id="grill-result" style="min-height:30px;font-size:18px;font-weight:bold;margin-top:10px;"></div>
+                </div>
+                <button id="leave-grill" style="background:#999;">← Leave</button>
+            </div>
             <!-- Skills Overlay (not a room) -->
             <div id="skills-overlay" style="display:none;">
                 <h2 style="margin:0 0 4px 0;font-size:11px;">📊 Skills</h2>
@@ -1071,13 +996,10 @@
             
             <!-- Shack Room -->
             <div class="room" id="shack-room">
-                <!-- Prospecting Info Box -->
-                <div style="background:rgba(222, 184, 135, 0.95);padding:15px 20px;border-radius:12px;border:3px solid #8b7355;max-width:350px;margin:20px auto 30px auto;box-shadow:0 4px 8px rgba(0,0,0,0.3);">
-                    <h2 id="shack-title" style="color:#3e2723;margin:0 0 8px 0;text-shadow:1px 1px 2px rgba(255,255,255,0.3);">⛏️ Prospecting Level 1</h2>
-                    <p id="shack-levelup-info" style="margin:0;font-size:14px;color:#3e2723;font-weight:500;">90% chance to level up with Small Geode</p>
-                </div>
+                <h2 id="shack-title">⛏️ Prospecting Level 1</h2>
                 
                 <div style="text-align:center;max-width:400px;margin:0 auto;">
+                    <p id="shack-levelup-info" style="margin-bottom:20px;font-size:14px;color:#666;">90% chance to level up with Small Geode</p>
                     
                     <!-- Geode Slot and Crack Button -->
                     <div style="display:flex;gap:20px;align-items:center;justify-content:center;margin:20px 0;">
@@ -1110,9 +1032,9 @@
             
             <!-- Shop Room -->
             <div class="room" id="shop-room">
-                <h2 style="margin-top:10px;margin-bottom:5px;">🛒 Shop</h2>
+                <h2>🛒 Shop</h2>
                 
-                <div id="shop-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:5px;max-width:500px;margin:10px auto 15px auto;padding:8px;position:relative;z-index:150;">
+                <div id="shop-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:5px;max-width:500px;margin:15px auto;padding:8px;position:relative;z-index:150;">
                     <!-- Shop items will be displayed here -->
                 </div>
             </div>
@@ -1243,7 +1165,7 @@
         <source src="./slimehearth-assets/music/fishing-lights.mp3" type="audio/mpeg">
     </audio>
     <audio id="bg-music" loop>
-        <source src="./slimehearth-assets/music/fishing-lights.mp3" type="audio/mpeg">
+        <source src="./slimekeeper-assets/music/fishing-lights.mp3" type="audio/mpeg">
     </audio>
     <div id="debug-console" style="position:fixed;top:70px;left:10px;width:250px;height:400px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:11px;padding:10px;overflow-y:auto;z-index:500;border:2px solid #0f0;border-radius:5px;display:none;"><div style="color:#fff;font-weight:bold;margin-bottom:5px;">DEBUG CONSOLE</div><div id="debug-log"></div></div>
     <!-- Notifications -->
@@ -1257,7 +1179,33 @@
     
     <script>
         // ===== GAME STATE =====
-        // gs is now defined early in the page (before egg hatching code)
+        const gs = {
+            hatched: false,
+            hunger: 100,
+            level: 1,
+            slimeXP: 0,
+            slimeXPNeeded: 100,
+            coins: 0,
+            inventory: {}, // Format: { 'fish_0': 1, 'carrot_1': 1 }
+            itemCounter: 0, // For unique item keys
+            tools: {}, // Format: { 'fishing_rod': true, 'better_net': true }
+            prospectingLevel: 1, // Prospecting skill (levels up by cracking geodes)
+            hats: {}, // Format: { 'top_hat': true, 'party_hat': true }
+            equippedHat: null, // Currently equipped hat (null = no hat)
+            keys: {}, // Format: { 'bronze_key': true, 'silver_key': true }
+            skills: { // Skill levels and XP
+                fishing: { level: 1, xp: 0, xpNeeded: 100 },
+                farming: { level: 1, xp: 0, xpNeeded: 100 },
+                cooking: { level: 1, xp: 0, xpNeeded: 100 }
+            },
+            stats: { // Permanent buffs from eating food
+                doubleXpChance: 0, // % chance for double XP (0-100)
+                doubleLootChance: 0, // % chance for double loot drops (0-100)
+                bonusGeodeChance: 0, // % bonus chance for geodes from cracking (0-100)
+                rareFindChance: 0, // % bonus chance for rare item drops (0-100)
+                foodsEaten: 0 // Total foods consumed
+            }
+        };
         
         // ===== CONSTANTS =====
         const BASKET_IMAGE = "";
@@ -1268,6 +1216,7 @@
             'fish2': '#4ade80',
             'fish3': '#fbbf24',
             'fish4': '#a855f7',
+            'fish': '#4dd0e1',
             'carrot': '#ffaa44',
             'carrot_seeds': '#8bc34a',
             'food': '#ff6b9d',
@@ -1280,10 +1229,7 @@
         };
         
         const ITEM_IMAGES = {
-            'fish1': './slimehearth-assets/images/fish1.png',
-            'fish2': './slimehearth-assets/images/fish2.png',
-            'fish3': './slimehearth-assets/images/fish3.png',
-            'fish4': './slimehearth-assets/images/fish4.png'
+            'fish': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAA8ADwDASIAAhEBAxEB/8QAGgABAAMBAQEAAAAAAAAAAAAAAAQFBgEDAv/EAC8QAAIBAwMBBwIGAwAAAAAAAAECAwAEEQUSITEiQVFhcYGRE7EUMjNSofBC0uH/xAAZAQADAQEBAAAAAAAAAAAAAAAAAwQCAQX/xAApEQACAQMCBQIHAAAAAAAAAAABAgADERIhMQQTIkFRgfAUMmGhsdHh/9oADAMBAAIRAxEAPwDGUpXVUswVQSxOAB1NEJyu7TtLYO0HBPd/eKsLXS3Y/UvQ0EG0ncSAT7f8q1hgswmI1t0OeAyh29yTx6UlqyqZhWao2NIX/EzNK0F1p8NwGjjSKK4BG1lyqsPSqB0aN2RxhlJBHnWqdQPtAN1FWFiO05SlKZNxWj0y2W1t1YlUldd8kjf4L3dft5elQtHso3JkmRZMquwMeBuYrz8VbXNk11HdwxyoXSQd23cAB0HzUtU5nEbRapz3K26V3+p8S0tHtFVZbQCRsdp5AH3H17q872JLgs0qJhuuFAFQIXu7O3ee4JnkcquCQMADA6e1LyW6uLeKeCBSMsGjkG4dMA4+amKsz2DdN956iWppkFkqfT420yK5t2CSRuomQHKnng+WeOnjVcdMtbm7JMTfWbmRGchVJOck/bHXwr306Oe0sJY5UbEyEIuPTHXpyDUi5coYFIaOcIyyIRg4B7J+Ceac99SNx7+8mfhlrMpJI9e3j0MiaroEdpFsaKPe6MY2iY/mAzg5/vWsrWw1OeaTdvY4jtmMPmccn16Vj6dRbK5EkCcuoyeLSXp97+DlbegeKQbXXHOPKrm0mjnkd7Z5GkABaORgSR3EHxGe/wBDWboCVIKkgjkEd1dekG1ncWVs6Zsfe82CXSuDG2G8UYYPuDXoszySxQQp2nYADHCjvPoBWbXV5ypE4jm/aHjB+2MV9tqUSoGS1g3t1GWOPUdP5qYcPY6iVfHVMbFNfIP7mg1K4iiu1WKb6yRoBKDIAc+IPTPj7V4398l1cR3E7/QkKKsMS9s7T+4d+aphq57eUiAX9ICAf7cfzUC5uZLqZpZmyx+APAU7BmJ0tJWq1qth8tu9/wCTQ6rqwdCLiRmlEbLGqwGMLkYzzyelZmlKcq47m84iY6k3MUpStxkUpSiEUpSiEUpSiE//2Q=='
         };
         
         const ITEM_DATA = {
@@ -1332,6 +1278,16 @@
                 description: 'A legendary golden fish!',
                 foodValue: 20,
                 sellValue: 20,
+                cookable: true,
+                feedable: true
+            },
+            'fish': {
+                name: 'Fish',
+                rarity: 'Uncommon',
+                rarityColor: '#4ade80',
+                description: 'A fresh catch from the pond.',
+                foodValue: 10,
+                sellValue: 5,
                 cookable: true,
                 feedable: true
             },
@@ -1673,11 +1629,11 @@
         }
         
         function save() {
-            localStorage.setItem('slimeHearth', JSON.stringify(gs));
+            localStorage.setItem('slimeKeeper', JSON.stringify(gs));
         }
         
         function load() {
-            const saved = localStorage.getItem('slimeHearth');
+            const saved = localStorage.getItem('slimeKeeper');
             if (saved) {
                 Object.assign(gs, JSON.parse(saved));
                 
@@ -1768,9 +1724,11 @@
             if (slimeXPText) slimeXPText.textContent = gs.slimeXP;
             if (slimeXPNeededText) slimeXPNeededText.textContent = gs.slimeXPNeeded;
             
-            // Show/hide hatch button
+            // Show/hide hatch button (if it exists)
             const hatchBtn = document.getElementById('hatch-btn');
-            hatchBtn.style.display = gs.hatched ? 'none' : 'block';
+            if (hatchBtn) {
+                hatchBtn.style.display = gs.hatched ? 'none' : 'block';
+            }
         }
         
         function addSkillXP(skillName, amount) {
@@ -2405,17 +2363,13 @@
             
             const renderOptions = { fillStyle: color };
             
-            // Use image for fish types if available
-            const itemData = ITEM_DATA[itemId];
-            if (itemData && itemData.image && ITEM_IMAGES[itemId]) {
-                console.log(`🐟 Rendering ${itemId} with image:`, ITEM_IMAGES[itemId]);
+            // Use image for fish
+            if (itemId === 'fish' && typeof ITEM_IMAGES !== 'undefined' && ITEM_IMAGES.fish) {
                 renderOptions.sprite = {
-                    texture: ITEM_IMAGES[itemId],
-                    xScale: 0.075,  // Half of 0.15
-                    yScale: 0.075
+                    texture: ITEM_IMAGES.fish,
+                    xScale: 0.7,
+                    yScale: 0.7
                 };
-            } else {
-                console.log(`📦 Rendering ${itemId} as colored box`);
             }
             
             const box = Bodies.rectangle(x, y, 40, 40, {
@@ -2506,13 +2460,12 @@
                 
                 const renderOptions = { fillStyle: color };
                 
-                // Use image for fish types if available
-                const itemData = ITEM_DATA[itemId];
-                if (itemData && itemData.image && ITEM_IMAGES[itemId]) {
+                // Use image for fish
+                if (itemId === 'fish' && typeof ITEM_IMAGES !== 'undefined' && ITEM_IMAGES.fish) {
                     renderOptions.sprite = {
-                        texture: ITEM_IMAGES[itemId],
-                        xScale: 0.075,
-                        yScale: 0.075
+                        texture: ITEM_IMAGES.fish,
+                        xScale: 0.7,
+                        yScale: 0.7
                     };
                 }
                 
@@ -4012,10 +3965,10 @@ function stopBasket() {
                 
                 if (gs.prospectingLevel >= 10) {
                     info.textContent = 'Max Level Reached!';
-                    info.style.color = '#2e7d32'; // Dark green for max level
+                    info.style.color = '#4ade80';
                 } else {
                     info.textContent = `${chance}% chance to level up with Small Geode`;
-                    info.style.color = '#3e2723'; // Dark brown to match the box
+                    info.style.color = '#666';
                 }
             }
         }
@@ -4407,7 +4360,53 @@ function initKitchenGame() {
         }
         
 // ===== GAME ACTIONS =====
-        // hatchSlime is now defined early in the page (after egg tap code)
+        function hatchSlime() {
+            console.log('Hatching slime');
+            
+            // Randomly select one of 5 slimes (equal chances)
+            const slimeVariants = [
+                'slime1.png',    // Blue slime
+                'slime2.png',    // Orange/red slime
+                'slime3.png',    // Green slime
+                'slime4.png',    // Yellow slime
+                'slime5.png'     // Pink slime
+            ];
+            
+            const randomIndex = Math.floor(Math.random() * slimeVariants.length);
+            const chosenSlime = slimeVariants[randomIndex];
+            
+            // Save which slime was chosen
+            gs.hatched = true;
+            gs.slimeVariant = chosenSlime;
+            
+            // Set the slime image
+            const slimeElement = document.getElementById('slime-square');
+            const imagePath = `./slimehearth-assets/images/${chosenSlime}`;
+            console.log('Trying to load slime image from:', imagePath);
+            slimeElement.style.backgroundImage = `url('${imagePath}')`;
+            slimeElement.classList.add('visible');
+            
+            notify('🎉 Your slime has hatched!');
+            
+            // Check if image loaded
+            setTimeout(() => {
+                const img = new Image();
+                img.onload = () => {
+                    console.log('✅ Slime image loaded successfully!');
+                };
+                img.onerror = () => {
+                    console.error('❌ Failed to load slime image!');
+                    notify('⚠️ Can\'t load slime images. Files may be missing or browser blocking local files.');
+                };
+                img.src = imagePath;
+            }, 500);
+            
+            save();
+            updateUI();
+        }
+        
+        // Make hatchSlime globally accessible
+        window.hatchSlime = hatchSlime;
         
         // Navigation - Fishing menu
         document.getElementById('goto-fishing-menu').onclick = () => switchRoom('fishing-menu-room');
@@ -4546,8 +4545,7 @@ function initKitchenGame() {
                 if (confirmed1) {
                     const confirmed2 = confirm('🚨 FINAL WARNING: All your progress will be lost! Continue?');
                     if (confirmed2) {
-                        // Clear ALL localStorage (safer than targeting specific keys)
-                        localStorage.clear();
+                        localStorage.removeItem('slimekeeper_save');
                         notify('🔄 Game Reset! Reloading...', 'achievement');
                         setTimeout(() => location.reload(), 1000);
                     }
@@ -4573,6 +4571,47 @@ function initKitchenGame() {
         };
         document.getElementById('back-to-area-cook').onclick = () => switchRoom('area-room');
         
+        // OLD COOKING MINIGAMES - buttons don't exist anymore, we go straight to The Hearth now
+        /*
+        document.getElementById('goto-kitchen').onclick = () => {
+            console.log('Going to kitchen...');
+            switchRoom('cooking-kitchen-room');
+            
+            // Set up slot click handler
+            setTimeout(() => {
+                console.log('showKitchenInventoryMenu function exists:', typeof showKitchenInventoryMenu);
+                const slot = document.getElementById('kitchen-ingredient-slot');
+                console.log('Kitchen slot element:', slot);
+                if (slot) {
+                    slot.onclick = () => {
+                        console.log('SLOT CLICKED!');
+                        try {
+                            console.log('Calling showKitchenInventoryMenu...');
+                            showKitchenInventoryMenu();
+                            console.log('showKitchenInventoryMenu completed');
+                        } catch(e) {
+                            console.error('Error calling menu:', e);
+                        }
+                    };
+                    console.log('Slot handler attached');
+                } else {
+                    console.error('Kitchen slot not found!');
+                }
+            }, 100);
+        };
+        document.getElementById('goto-grill').onclick = () => {
+            switchRoom('cooking-grill-room');
+            initGrillGame();
+        };
+        document.getElementById('leave-kitchen').onclick = () => {
+            stopKitchenGame();
+            switchRoom('cooking-menu-room');
+        };
+        document.getElementById('leave-grill').onclick = () => {
+            stopGrillGame();
+            switchRoom('cooking-menu-room');
+        };
+
         
         document.getElementById('stir-kitchen-btn').onclick = stirKitchen;
         document.getElementById('grill-heat-up').onclick = grillHeatUp;
@@ -5123,30 +5162,6 @@ function initKitchenGame() {
             
             display.appendChild(waterDoor);
         }
-        
-        
-        // ===== PRELOAD FISH IMAGES FOR MATTER.JS =====
-        // Matter.js sprite textures just need the image URL/path, not the Image object
-        // The images will be loaded by Matter's renderer when needed
-        
-        function preloadFishImages() {
-            // Just verify the images exist by attempting to load them
-            const fishImagesToLoad = ['fish1', 'fish2', 'fish3', 'fish4'];
-            
-            fishImagesToLoad.forEach(fishId => {
-                const img = new Image();
-                img.onload = () => {
-                    console.log(`✅ Fish image verified: ${fishId}.png`);
-                };
-                img.onerror = () => {
-                    console.error(`❌ Failed to load ${fishId}.png - check file path!`);
-                };
-                img.src = ITEM_IMAGES[fishId];
-            });
-        }
-        
-        // Verify images on page load
-        preloadFishImages();
         
 // ===== INIT =====
         load();
