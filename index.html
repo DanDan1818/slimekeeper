@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.429</title>
+    <title>SlimeHearth v0.430</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -177,16 +177,11 @@
             transform: scale(0.95);
         }
         
-        /* Floating Bag Button */
-        #floating-bag-btn:active {
-            transform: translateX(-50%) scale(0.95);
-        }
-        
         /* Basket Container - Physics Canvas */
         .basket-container {
             position: fixed;
             bottom: 72px;
-            left: calc(50% - 340px);  /* Align with bag button */
+            left: 0;  /* Bottom-left corner */
             transform: scale(0.8);
             transform-origin: left bottom;  /* Scale from left bottom */
             width: 100%;
@@ -531,7 +526,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.429</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.430</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -1168,13 +1163,11 @@
         <button class="nav-btn" id="nav-home">🏠</button>
         <button class="nav-btn" id="nav-area">🎮</button>
         <button class="nav-btn" id="nav-shop">🛒</button>
+        <button class="nav-btn" id="floating-bag-btn">🎒</button>
         <button class="nav-btn" id="nav-shack">🛖</button>
         <button class="nav-btn" id="nav-room">🚪</button>
         <button class="nav-btn" id="nav-settings">⚙️</button>
     </div>
-    
-    <!-- Floating Bag Button - Above bottom nav, left corner -->
-    <button id="floating-bag-btn" style="position: fixed; bottom: 75px; left: calc(50% - 350px); width: 50px; height: 50px; background: rgba(255,255,255,0.95); border: 3px solid #333; border-radius: 50%; font-size: 26px; cursor: pointer; z-index: 600; box-shadow: 0 4px 8px rgba(0,0,0,0.3); transition: transform 0.1s; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">🎒</button>
     
     
         <!-- Sell Basket Container removed -->
