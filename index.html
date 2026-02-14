@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.403</title>
+    <title>SlimeHearth v0.405</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -543,7 +543,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.403</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.405</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -596,7 +596,7 @@
                     hatchEgg.textContent = '💥';
                     
                     setTimeout(() => {
-                        hatchOverlay.style.display = 'none';
+                        // Don't hide overlay here - let hatchSlime handle it
                         
                         // Start music
                         const bgMusic = document.getElementById('bg-music');
@@ -633,7 +633,6 @@
         (function() {
             const titleOverlay = document.getElementById('title-overlay');
             const hatchOverlay = document.getElementById('hatch-overlay');
-            const hatchBtn = document.getElementById('final-hatch-btn');
             
             // Title screen click
             titleOverlay.addEventListener('click', function() {
@@ -645,31 +644,6 @@
                 titleOverlay.style.display = 'none';
                 hatchOverlay.style.display = 'flex';
             }, {passive: true});
-            
-            // Hatch button click
-            function doHatch() {
-                hatchOverlay.style.display = 'none';
-                
-                // Start background music
-                const bgMusic = document.getElementById('bg-music');
-                if (bgMusic) {
-                    bgMusic.volume = 0.3;
-                    bgMusic.play().catch(function(error) {
-                        console.log('Music autoplay blocked:', error);
-                    });
-                }
-                
-                // Call the actual hatchSlime function after a short delay
-                // to ensure all game code is loaded
-                setTimeout(function() {
-                    if (typeof window.hatchSlime === 'function') {
-                        window.hatchSlime();
-                    }
-                }, 100);
-            }
-            
-            hatchBtn.addEventListener('click', doHatch);
-            hatchBtn.addEventListener('touchstart', doHatch, {passive: true});
         })();
     </script>
     
@@ -4363,6 +4337,20 @@ function initKitchenGame() {
             const randomIndex = Math.floor(Math.random() * slimeVariants.length);
             const chosenSlime = slimeVariants[randomIndex];
             
+            // Prompt for slime name FIRST (before hiding overlay)
+            const name = prompt('🎉 Your slime has hatched!\n\nWhat would you like to name your slime?', 'Slime');
+            if (name && name.trim() !== '') {
+                gs.slimeName = name.trim();
+            } else {
+                gs.slimeName = 'Slime';
+            }
+            
+            // NOW hide the hatch overlay
+            const hatchOverlay = document.getElementById('hatch-overlay');
+            if (hatchOverlay) {
+                hatchOverlay.style.display = 'none';
+            }
+            
             // Save which slime was chosen
             gs.hatched = true;
             gs.slimeVariant = chosenSlime;
@@ -4373,6 +4361,9 @@ function initKitchenGame() {
             console.log('Trying to load slime image from:', imagePath);
             slimeElement.style.backgroundImage = `url('${imagePath}')`;
             slimeElement.classList.add('visible');
+            
+            // Show welcome notification
+            notify(`Meet ${gs.slimeName}! 🎉`);
             
             // Check if image loaded
             setTimeout(() => {
@@ -4386,20 +4377,6 @@ function initKitchenGame() {
                 };
                 img.src = imagePath;
             }, 500);
-            
-            // Prompt for slime name
-            setTimeout(() => {
-                const name = prompt('🎉 Your slime has hatched!\n\nWhat would you like to name your slime?', 'Slime');
-                if (name && name.trim() !== '') {
-                    gs.slimeName = name.trim();
-                    notify(`Meet ${gs.slimeName}! 🎉`);
-                } else {
-                    gs.slimeName = 'Slime';
-                    notify('🎉 Your slime has hatched!');
-                }
-                save();
-                updateUI();
-            }, 600);
             
             save();
             updateUI();
