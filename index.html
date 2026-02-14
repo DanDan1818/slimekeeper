@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.405</title>
+    <title>SlimeHearth v0.409</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -543,7 +543,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.405</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.409</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -596,6 +596,9 @@
                     hatchEgg.textContent = '💥';
                     
                     setTimeout(() => {
+                        console.log('10 taps reached! Checking for hatchSlime...');
+                        console.log('window.hatchSlime exists?', typeof window.hatchSlime);
+                        
                         // Don't hide overlay here - let hatchSlime handle it
                         
                         // Start music
@@ -607,7 +610,10 @@
                         
                         // Hatch the slime
                         if (typeof window.hatchSlime === 'function') {
+                            console.log('Calling hatchSlime...');
                             window.hatchSlime();
+                        } else {
+                            console.error('hatchSlime function not found!');
                         }
                     }, 500);
                 }
@@ -619,6 +625,112 @@
                 tapEgg();
             }, {passive: false});
         })();
+        
+        // ===== GAME STATE (defined early so hatchSlime can use it) =====
+        window.gs = {
+            hatched: false,
+            slimeName: 'Slime', // Default name
+            hunger: 100,
+            level: 1,
+            slimeXP: 0,
+            slimeXPNeeded: 100,
+            coins: 0,
+            inventory: {}, // Format: { 'fish_0': 1, 'carrot_1': 1 }
+            itemCounter: 0, // For unique item keys
+            tools: {}, // Format: { 'fishing_rod': true, 'better_net': true }
+            prospectingLevel: 1, // Prospecting skill (levels up by cracking geodes)
+            hats: {}, // Format: { 'top_hat': true, 'party_hat': true }
+            equippedHat: null, // Currently equipped hat (null = no hat)
+            keys: {}, // Format: { 'bronze_key': true, 'silver_key': true }
+            skills: { // Skill levels and XP
+                fishing: { level: 1, xp: 0, xpNeeded: 100 },
+                farming: { level: 1, xp: 0, xpNeeded: 100 },
+                cooking: { level: 1, xp: 0, xpNeeded: 100 }
+            },
+            stats: { // Permanent buffs from eating food
+                doubleXpChance: 0, // % chance for double XP (0-100)
+                doubleLootChance: 0, // % chance for double loot drops (0-100)
+                bonusGeodeChance: 0, // % bonus chance for geodes from cracking (0-100)
+                rareFindChance: 0, // % bonus chance for rare item drops (0-100)
+                foodsEaten: 0 // Total foods consumed
+            }
+        };
+        const gs = window.gs; // Also make it available as local const
+        
+        // Define hatchSlime early so egg tap can use it
+        window.hatchSlime = function() {
+            console.log('Hatching slime');
+            
+            // Wait for gs to be defined if it's not ready yet
+            if (typeof gs === 'undefined') {
+                console.error('Game state not ready yet, retrying in 100ms...');
+                setTimeout(window.hatchSlime, 100);
+                return;
+            }
+            
+            // Randomly select one of 5 slimes (equal chances)
+            const slimeVariants = [
+                'slime1.png',    // Blue slime
+                'slime2.png',    // Orange/red slime
+                'slime3.png',    // Green slime
+                'slime4.png',    // Yellow slime
+                'slime5.png'     // Pink slime
+            ];
+            
+            const randomIndex = Math.floor(Math.random() * slimeVariants.length);
+            const chosenSlime = slimeVariants[randomIndex];
+            
+            // Prompt for slime name FIRST (before hiding overlay)
+            const name = prompt('🎉 Your slime has hatched!\n\nWhat would you like to name your slime?', 'Slime');
+            if (name && name.trim() !== '') {
+                gs.slimeName = name.trim();
+            } else {
+                gs.slimeName = 'Slime';
+            }
+            
+            // NOW hide the hatch overlay
+            const hatchOverlay = document.getElementById('hatch-overlay');
+            if (hatchOverlay) {
+                hatchOverlay.style.display = 'none';
+            }
+            
+            // Save which slime was chosen
+            gs.hatched = true;
+            gs.slimeVariant = chosenSlime;
+            
+            // Set the slime image
+            const slimeElement = document.getElementById('slime-square');
+            const imagePath = `./slimehearth-assets/images/${chosenSlime}`;
+            console.log('Trying to load slime image from:', imagePath);
+            if (slimeElement) {
+                slimeElement.style.backgroundImage = `url('${imagePath}')`;
+                slimeElement.classList.add('visible');
+            }
+            
+            // Show welcome notification
+            if (typeof notify === 'function') {
+                notify(`Meet ${gs.slimeName}! 🎉`);
+            }
+            
+            // Check if image loaded
+            setTimeout(() => {
+                const img = new Image();
+                img.onload = () => {
+                    console.log('✅ Slime image loaded successfully!');
+                };
+                img.onerror = () => {
+                    console.error('❌ Failed to load slime image!');
+                    if (typeof notify === 'function') {
+                        notify('⚠️ Can\'t load slime images. Files may be missing or browser blocking local files.');
+                    }
+                };
+                img.src = imagePath;
+            }, 500);
+            
+            // Save and update (these functions will be defined later)
+            if (typeof save === 'function') save();
+            if (typeof updateUI === 'function') updateUI();
+        };
     </script>
     
     <style>
@@ -1145,34 +1257,7 @@
     
     <script>
         // ===== GAME STATE =====
-        const gs = {
-            hatched: false,
-            slimeName: 'Slime', // Default name
-            hunger: 100,
-            level: 1,
-            slimeXP: 0,
-            slimeXPNeeded: 100,
-            coins: 0,
-            inventory: {}, // Format: { 'fish_0': 1, 'carrot_1': 1 }
-            itemCounter: 0, // For unique item keys
-            tools: {}, // Format: { 'fishing_rod': true, 'better_net': true }
-            prospectingLevel: 1, // Prospecting skill (levels up by cracking geodes)
-            hats: {}, // Format: { 'top_hat': true, 'party_hat': true }
-            equippedHat: null, // Currently equipped hat (null = no hat)
-            keys: {}, // Format: { 'bronze_key': true, 'silver_key': true }
-            skills: { // Skill levels and XP
-                fishing: { level: 1, xp: 0, xpNeeded: 100 },
-                farming: { level: 1, xp: 0, xpNeeded: 100 },
-                cooking: { level: 1, xp: 0, xpNeeded: 100 }
-            },
-            stats: { // Permanent buffs from eating food
-                doubleXpChance: 0, // % chance for double XP (0-100)
-                doubleLootChance: 0, // % chance for double loot drops (0-100)
-                bonusGeodeChance: 0, // % bonus chance for geodes from cracking (0-100)
-                rareFindChance: 0, // % bonus chance for rare item drops (0-100)
-                foodsEaten: 0 // Total foods consumed
-            }
-        };
+        // gs is now defined early in the page (before egg hatching code)
         
         // ===== CONSTANTS =====
         const BASKET_IMAGE = "";
@@ -4322,68 +4407,7 @@ function initKitchenGame() {
         }
         
 // ===== GAME ACTIONS =====
-        function hatchSlime() {
-            console.log('Hatching slime');
-            
-            // Randomly select one of 5 slimes (equal chances)
-            const slimeVariants = [
-                'slime1.png',    // Blue slime
-                'slime2.png',    // Orange/red slime
-                'slime3.png',    // Green slime
-                'slime4.png',    // Yellow slime
-                'slime5.png'     // Pink slime
-            ];
-            
-            const randomIndex = Math.floor(Math.random() * slimeVariants.length);
-            const chosenSlime = slimeVariants[randomIndex];
-            
-            // Prompt for slime name FIRST (before hiding overlay)
-            const name = prompt('🎉 Your slime has hatched!\n\nWhat would you like to name your slime?', 'Slime');
-            if (name && name.trim() !== '') {
-                gs.slimeName = name.trim();
-            } else {
-                gs.slimeName = 'Slime';
-            }
-            
-            // NOW hide the hatch overlay
-            const hatchOverlay = document.getElementById('hatch-overlay');
-            if (hatchOverlay) {
-                hatchOverlay.style.display = 'none';
-            }
-            
-            // Save which slime was chosen
-            gs.hatched = true;
-            gs.slimeVariant = chosenSlime;
-            
-            // Set the slime image
-            const slimeElement = document.getElementById('slime-square');
-            const imagePath = `./slimehearth-assets/images/${chosenSlime}`;
-            console.log('Trying to load slime image from:', imagePath);
-            slimeElement.style.backgroundImage = `url('${imagePath}')`;
-            slimeElement.classList.add('visible');
-            
-            // Show welcome notification
-            notify(`Meet ${gs.slimeName}! 🎉`);
-            
-            // Check if image loaded
-            setTimeout(() => {
-                const img = new Image();
-                img.onload = () => {
-                    console.log('✅ Slime image loaded successfully!');
-                };
-                img.onerror = () => {
-                    console.error('❌ Failed to load slime image!');
-                    notify('⚠️ Can\'t load slime images. Files may be missing or browser blocking local files.');
-                };
-                img.src = imagePath;
-            }, 500);
-            
-            save();
-            updateUI();
-        }
-        
-        // Make hatchSlime globally accessible
-        window.hatchSlime = hatchSlime;
+        // hatchSlime is now defined early in the page (after egg tap code)
         
         // Navigation - Fishing menu
         document.getElementById('goto-fishing-menu').onclick = () => switchRoom('fishing-menu-room');
