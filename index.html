@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.421</title>
+    <title>SlimeHearth v0.422</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -531,7 +531,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.421</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.422</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -2029,12 +2029,13 @@
             // Set basket background image
             const basketBg = document.getElementById('basket-bg-image');
             if (basketBg) {
-                // Don't overwrite the bag1.png background image set in HTML
-                // basketBg.style.backgroundImage = "url('data:image/png;base64," + BASKET_IMAGE + "')";
+                // Set bag1.png as background
+                basketBg.style.backgroundImage = "url('/slimehearth-assets/images/bag1.png?v=4')";
                 basketBg.style.backgroundSize = 'contain';
                 basketBg.style.backgroundRepeat = 'no-repeat';
                 basketBg.style.backgroundPosition = 'center';
-                console.log('Basket background image preserved');
+                console.log('Basket background image set to bag1.png');
+                console.log('Background image value:', basketBg.style.backgroundImage);
             }
             
             console.log('Basket opening...');
