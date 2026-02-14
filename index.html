@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.409</title>
+    <title>SlimeHearth v0.412</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -531,7 +531,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.409</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.412</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -540,7 +540,7 @@
             <h2 id="hatch-instruction" style="font-size:32px;color:#333;margin-bottom:30px;">🥚 Tap the egg to hatch!</h2>
             
             <!-- Tappable Egg -->
-            <div id="hatch-egg" style="width:180px;height:180px;cursor:pointer;user-select:none;transition:transform 0.1s, opacity 0.5s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;background-image:url('./slimehearth-assets/images/egg1.png');background-size:contain;background-repeat:no-repeat;background-position:center;">
+            <div id="hatch-egg" style="width:180px;height:180px;cursor:pointer;user-select:none;transition:transform 0.1s, opacity 0.5s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;background-image:url('./slimehearth-assets/images/egg1.png');background-size:contain;background-repeat:no-repeat;background-position:center;margin:0 auto;">
             </div>
             
             <!-- Tap Counter -->
@@ -1153,7 +1153,7 @@
         
         <!-- Basket Physics Container -->
         <div class="basket-container" id="basket-container">
-            <div id="basket-bg-image" style="position:absolute;bottom:-50px;left:0;width:300px;height:300px;z-index:1;pointer-events:none;"></div>
+            <div id="basket-bg-image" style="position:absolute;bottom:-50px;left:0;width:300px;height:300px;z-index:1;pointer-events:none;background-image:url('./slimehearth-assets/images/bag1.png');background-size:contain;background-repeat:no-repeat;background-position:center;"></div>
             <canvas id="basket-canvas" width="820" height="1200"></canvas>
             <button class="basket-close-btn" id="basket-close">×</button>
             <div id="inventory-counter">0/6</div>
@@ -1256,7 +1256,12 @@
             'fish1': './slimehearth-assets/images/fish1.png',
             'fish2': './slimehearth-assets/images/fish2.png',
             'fish3': './slimehearth-assets/images/fish3.png',
-            'fish4': './slimehearth-assets/images/fish4.png'
+            'fish4': './slimehearth-assets/images/fish4.png',
+            'gem': './slimehearth-assets/images/gem1.png',
+            'small_geode': './slimehearth-assets/images/geode1.png',
+            'carrot': './slimehearth-assets/images/carrot1.png',
+            'food': './slimehearth-assets/images/food1.png',
+            'basket': './slimehearth-assets/images/basket1.png'
         };
         
         const ITEM_DATA = {
@@ -1320,6 +1325,8 @@
             },
             'carrot': {
                 name: 'Carrot',
+                emoji: '🥕',
+                image: 'carrot1.png',
                 rarity: 'Common',
                 rarityColor: '#9ca3af',
                 description: 'A crunchy orange vegetable.',
@@ -1341,6 +1348,8 @@
             },
             'food': {
                 name: 'Cooked Food',
+                emoji: '🍖',
+                image: 'food1.png',
                 rarity: 'Rare',
                 rarityColor: '#a78bfa',
                 description: 'A delicious prepared meal.',
@@ -1371,6 +1380,8 @@
             },
             'small_geode': {
                 name: 'Small Geode',
+                emoji: '🪨',
+                image: 'geode1.png',
                 rarity: 'Rare',
                 rarityColor: '#a78bfa',
                 description: 'A mysterious rocky shell.',
@@ -1393,6 +1404,8 @@
             },
             'gem': {
                 name: 'Gem',
+                emoji: '💎',
+                image: 'gem1.png',
                 rarity: 'Legendary',
                 rarityColor: '#fbbf24',
                 description: 'A beautiful sparkling gem!',
@@ -1404,6 +1417,8 @@
             },
             'basket': {
                 name: '🧺 Basket',
+                emoji: '🧺',
+                image: 'basket1.png',
                 rarity: 'Uncommon',
                 rarityColor: '#fbbf24',
                 description: 'A mysterious basket. Feed to slime to open!',
