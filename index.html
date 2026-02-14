@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.422</title>
+    <title>SlimeHearth v0.423</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -531,7 +531,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.422</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.423</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -1153,7 +1153,7 @@
         
         <!-- Basket Physics Container -->
         <div class="basket-container" id="basket-container">
-            <div id="basket-bg-image" style="position:absolute !important;bottom:20px !important;left:20px !important;width:150px !important;height:150px !important;z-index:9 !important;pointer-events:none;background-image:url('/slimehearth-assets/images/bag1.png?v=3');background-size:contain;background-repeat:no-repeat;background-position:center;border:2px solid red;display:block !important;"></div>
+            <div id="basket-bg-image" style="position:absolute !important;bottom:20px !important;left:20px !important;width:150px !important;height:150px !important;z-index:50 !important;pointer-events:none;background-image:url('/slimehearth-assets/images/bag1.png?v=5');background-size:contain;background-repeat:no-repeat;background-position:center;border:2px solid red;display:block !important;"></div>
             <canvas id="basket-canvas" width="820" height="1200"></canvas>
             <button class="basket-close-btn" id="basket-close">×</button>
             <div id="inventory-counter">0/6</div>
