@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.402</title>
+    <title>SlimeHearth v0.403</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -534,7 +534,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.402</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.403</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -653,7 +653,6 @@
         <!-- Left: Slime Name -->
         <div class="stat-display" style="flex:1;text-align:left;padding-left:15px;">
             <div style="font-size:16px;font-weight:bold;color:#4dabf7;" id="slime-name-display">Slime</div>
-            <div style="font-size:10px;color:#999;">Your Slime</div>
         </div>
         
         <!-- Middle: Slime Level (Clickable) -->
@@ -1203,6 +1202,7 @@
         // ===== GAME STATE =====
         const gs = {
             hatched: false,
+            slimeName: 'Slime', // Default name
             hunger: 100,
             level: 1,
             slimeXP: 0,
@@ -4415,6 +4415,19 @@ function initKitchenGame() {
             slimeElement.classList.add('visible');
             
             notify('🎉 Your slime has hatched!');
+            
+            // Prompt for slime name after a brief delay
+            setTimeout(() => {
+                const name = prompt('What would you like to name your slime?', 'Slime');
+                if (name && name.trim() !== '') {
+                    gs.slimeName = name.trim();
+                    notify(`Meet ${gs.slimeName}! 🎉`);
+                } else {
+                    gs.slimeName = 'Slime';
+                }
+                save();
+                updateUI();
+            }, 600);
             
             // Check if image loaded
             setTimeout(() => {
