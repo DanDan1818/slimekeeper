@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v1.001</title>
+    <title>SlimeHearth v0.402</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -83,24 +83,34 @@
             justify-content: center;
         }
         
+        #shop-room.active {
+            justify-content: flex-start;
+            padding-top: 10px;
+        }
+        
+        #area-room.active {
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+        
         /* Room Backgrounds */
         #shop-room {
             background-image: url('./slimehearth-assets/images/shop-background.png');
-        }
-        
-        #hearth-room {
-            background-image: url('./slimehearth-assets/images/hearth-background.png');
         }
         
         #shack-room {
             background-image: url('./slimehearth-assets/images/shack-background.png');
         }
         
-        #pond-room {
+        #fishing-pond-room {
             background-image: url('./slimehearth-assets/images/pond-background.png');
         }
         
-        #garden-room, #field-room {
+        #cooking-menu-room {
+            background-image: url('./slimehearth-assets/images/hearth-background.png');
+        }
+        
+        #farming-garden-room, #farming-field-room {
             background-image: url('./slimehearth-assets/images/farm-background.png');
         }
         
@@ -523,8 +533,8 @@
          style="position:fixed;top:0;left:0;width:100%;height:100%;background-image:url('./slimehearth-assets/images/titlescreen-background.png');background-size:cover;background-position:center;background-repeat:no-repeat;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;"
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
-        <p style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:20px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v1.001</div>
+        <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.402</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -606,6 +616,15 @@
         @keyframes titleBounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        
+        .pulse-text {
+            animation: pulse 2s ease-in-out infinite;
         }
     </style>
     
@@ -996,10 +1015,13 @@
             
             <!-- Shack Room -->
             <div class="room" id="shack-room">
-                <h2 id="shack-title">⛏️ Prospecting Level 1</h2>
+                <!-- Prospecting Info Box -->
+                <div style="background:rgba(222, 184, 135, 0.95);padding:15px 20px;border-radius:12px;border:3px solid #8b7355;max-width:350px;margin:20px auto 30px auto;box-shadow:0 4px 8px rgba(0,0,0,0.3);">
+                    <h2 id="shack-title" style="color:#3e2723;margin:0 0 8px 0;text-shadow:1px 1px 2px rgba(255,255,255,0.3);">⛏️ Prospecting Level 1</h2>
+                    <p id="shack-levelup-info" style="margin:0;font-size:14px;color:#3e2723;font-weight:500;">90% chance to level up with Small Geode</p>
+                </div>
                 
                 <div style="text-align:center;max-width:400px;margin:0 auto;">
-                    <p id="shack-levelup-info" style="margin-bottom:20px;font-size:14px;color:#666;">90% chance to level up with Small Geode</p>
                     
                     <!-- Geode Slot and Crack Button -->
                     <div style="display:flex;gap:20px;align-items:center;justify-content:center;margin:20px 0;">
@@ -3971,10 +3993,10 @@ function stopBasket() {
                 
                 if (gs.prospectingLevel >= 10) {
                     info.textContent = 'Max Level Reached!';
-                    info.style.color = '#4ade80';
+                    info.style.color = '#2e7d32';
                 } else {
                     info.textContent = `${chance}% chance to level up with Small Geode`;
-                    info.style.color = '#666';
+                    info.style.color = '#3e2723';
                 }
             }
         }
