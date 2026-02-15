@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.441</title>
+    <title>SlimeHearth v0.445</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -245,8 +245,8 @@
         /* Notifications */
         #notifications {
             position: fixed;
-            top: 70px;
-            left: calc(50% - 340px);
+            top: 100px;
+            right: 10px;
             width: 200px;
             z-index: 999;
             pointer-events: none;
@@ -254,7 +254,8 @@
         
         @media (max-width: 700px) {
             #notifications {
-                left: 10px;
+                right: 10px;
+                top: 100px;
             }
             
             .basket-container {
@@ -317,18 +318,28 @@
             color: #fff;
             padding: 15px 30px;
             margin-bottom: 10px;
-            border-radius: 10px;
-            font-size: 18px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: bold;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             border: 3px solid rgba(255,255,255,0.3);
-            animation: popIn 0.3s ease-out, fadeOut 0.3s 2.7s;
-            min-width: 200px;
+            animation: popIn 0.3s ease-out, glow 1.5s ease-in-out infinite, fadeOut 0.3s 3.7s;
+            padding: 8px 15px;
+            min-width: 160px;
         }
         
         .special-notification.achievement {
             background: rgba(168, 85, 247, 0.95);
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 10px rgba(255,255,255,0.3);
+            }
+            50% {
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 25px rgba(255,255,255,0.8);
+            }
         }
         
         @keyframes popIn {
@@ -535,7 +546,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.441</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.445</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -1582,19 +1593,16 @@
             
             tooltip.style.cssText = `
                 position: fixed;
-                top: ${isMobile ? '70px' : '50%'};
-                left: ${isMobile ? '10px' : 'calc(50% - 300px)'};
-                ${isMobile ? 'right: 10px;' : ''}
-                transform: ${isMobile ? 'none' : 'translateY(-50%)'};
+                top: 100px;
+                left: 10px;
                 background: rgba(255,255,255,0.95);
                 color: #333;
-                padding: 6px 10px;
-                border-radius: 4px;
+                padding: 8px 10px;
+                border-radius: 6px;
                 z-index: 135;
                 border: 2px solid ${data.rarityColor};
                 box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-                min-width: ${isMobile ? 'auto' : '110px'};
-                max-width: ${isMobile ? 'calc(100vw - 20px)' : 'none'};
+                width: 150px;
                 text-align: left;
                 pointer-events: none;
             `;
@@ -1669,7 +1677,7 @@
                 
                 notif.textContent = message;
                 container.appendChild(notif);
-                setTimeout(() => notif.remove(), 3000);
+                setTimeout(() => notif.remove(), 4000);
                 return;
             }
             
@@ -2886,8 +2894,9 @@ function stopBasket() {
             if (area !== 'pond') return; // Only pond uses this new system
             
             if (!pondCastActive && !pondHolding) {
-                // First click/tap - CAST
+                // Start cast AND hold immediately
                 castPondLine();
+                pondHolding = true; // Player is holding from the start
             }
         }
         
@@ -2929,41 +2938,40 @@ function stopBasket() {
                     // Show splash on first frame of catch window
                     if (splash && splash.style.display === 'none') {
                         splash.style.display = 'block';
-                        setTimeout(() => { splash.style.display = 'none'; }, 600);
+                        setTimeout(() => { 
+                            if (splash) splash.style.display = 'none'; 
+                        }, 600);
                     }
                 } else {
                     bar.style.background = '#4dd0e1'; // Blue
-                    if (splash) splash.style.display = 'none';
                 }
                 
                 // Time's up
                 if (pondElapsedTime >= totalTime) {
                     clearInterval(pondTimerInterval);
-                    if (!pondHolding) {
-                        result.textContent = '❌ Missed!';
-                        resetPondFishing();
-                    }
+                    pondTimerInterval = null;
+                    result.textContent = '❌ Missed - line too long!';
+                    resetPondFishing();
                 }
             }, 50);
         }
         
         function startPondHold() {
-            if (!pondCastActive) return;
-            pondHolding = true;
+            // Removed - no longer needed
         }
         
         function stopFishing() {
-            if (!pondCastActive) return;
+            if (!pondCastActive && !pondHolding) return; // Not active
             
-            pondHolding = false;
             clearInterval(pondTimerInterval);
             
             // Check if released during catch window
             if (pondElapsedTime >= pondCatchStart && pondElapsedTime <= pondCatchEnd) {
                 // SUCCESS!
                 completeFishing(true);
+                resetPondFishing();
             } else {
-                // MISSED
+                // MISSED - released too early or too late
                 const result = document.getElementById('fishing-result-pond');
                 result.textContent = '❌ Too early/late!';
                 resetPondFishing();
@@ -2973,14 +2981,21 @@ function stopBasket() {
         function resetPondFishing() {
             pondCastActive = false;
             pondHolding = false;
+            pondElapsedTime = 0;
             clearInterval(pondTimerInterval);
+            pondTimerInterval = null;
             
             setTimeout(() => {
                 const result = document.getElementById('fishing-result-pond');
                 const bar = document.getElementById('fishing-bar-pond');
-                result.textContent = '';
-                bar.style.width = '0%';
-                bar.style.background = '#4dd0e1';
+                const splash = document.getElementById('pond-splash');
+                
+                if (result) result.textContent = '';
+                if (bar) {
+                    bar.style.width = '0%';
+                    bar.style.background = '#4dd0e1';
+                }
+                if (splash) splash.style.display = 'none';
             }, 1500);
         }
         
@@ -4671,12 +4686,29 @@ function initKitchenGame() {
         // Fishing buttons
         // Pond: hold to fish
         const pondBtn = document.getElementById('fish-pond-btn');
-        pondBtn.addEventListener('click', () => startFishing('pond'));
-        pondBtn.addEventListener('mousedown', startPondHold);
+        
+        // Desktop: mousedown starts, mouseup checks
+        pondBtn.addEventListener('mousedown', () => {
+            if (!pondCastActive && !pondHolding) {
+                startFishing('pond');
+            }
+        });
         pondBtn.addEventListener('mouseup', stopFishing);
-        pondBtn.addEventListener('mouseleave', stopFishing);
-        pondBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPondHold(); });
-        pondBtn.addEventListener('touchend', (e) => { e.preventDefault(); stopFishing(); });
+        pondBtn.addEventListener('mouseleave', () => {
+            if (pondCastActive || pondHolding) stopFishing();
+        });
+        
+        // Mobile: touchstart starts, touchend checks
+        pondBtn.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); 
+            if (!pondCastActive && !pondHolding) {
+                startFishing('pond');
+            }
+        });
+        pondBtn.addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            stopFishing(); 
+        });
         
         // River: hold to start, release to stop
         const riverBtn = document.getElementById('cast-river');
