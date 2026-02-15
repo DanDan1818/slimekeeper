@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.452</title>
+    <title>SlimeHearth v0.457</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -107,6 +107,21 @@
         }
         
         #fishing-pond-room.active {
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+        
+        #fishing-river-room.active {
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+        
+        #fishing-menu-room.active {
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+        
+        #farming-menu-room.active {
             justify-content: flex-start;
             padding-top: 40px;
         }
@@ -437,6 +452,10 @@
             transform: scale(0.95);
         }
         
+        #cast-river:active {
+            transform: scale(0.95);
+        }
+        
         #fishing-bar-river {
             position: absolute;
             left: 0;
@@ -545,7 +564,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.452</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.457</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -755,7 +774,7 @@
                         <div id="fishing-bar-river"></div>
                         <div id="fishing-target-river"></div>
                     </div>
-                    <button id="cast-river">🎣 Cast Line (Hold)</button>
+                    <button id="cast-river" style="width:80px;height:80px;border-radius:50%;background:#4dd0e1;color:#fff;border:4px solid #fff;font-size:40px;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;padding:0;transition:transform 0.1s;">🎣</button>
                     <div id="fishing-timer-river"></div>
                 </div>
                 <button id="leave-river" style="background:#999;">← Leave</button>
@@ -1312,7 +1331,7 @@
                 rarity: 'Common',
                 rarityColor: '#9ca3af',
                 description: 'A common fish from the pond.',
-                foodValue: 8,
+                foodValue: 2,
                 sellValue: 3,
                 cookable: true,
                 feedable: true
@@ -1324,7 +1343,7 @@
                 rarity: 'Uncommon',
                 rarityColor: '#4ade80',
                 description: 'A colorful blue fish.',
-                foodValue: 10,
+                foodValue: 3,
                 sellValue: 5,
                 cookable: true,
                 feedable: true
@@ -1336,7 +1355,7 @@
                 rarity: 'Rare',
                 rarityColor: '#fbbf24',
                 description: 'A rare tropical fish!',
-                foodValue: 15,
+                foodValue: 4,
                 sellValue: 10,
                 cookable: true,
                 feedable: true
@@ -1348,7 +1367,7 @@
                 rarity: 'Epic',
                 rarityColor: '#a855f7',
                 description: 'A legendary golden fish!',
-                foodValue: 20,
+                foodValue: 5,
                 sellValue: 20,
                 cookable: true,
                 feedable: true
@@ -1358,7 +1377,7 @@
                 rarity: 'Uncommon',
                 rarityColor: '#4ade80',
                 description: 'A fresh catch from the pond.',
-                foodValue: 10,
+                foodValue: 3,
                 sellValue: 5,
                 cookable: true,
                 feedable: true
@@ -2923,8 +2942,8 @@ function stopBasket() {
             bar.style.width = '0%';
             bar.style.background = '#4dd0e1';
             
-            // Random wait time 1-10 seconds
-            const totalTime = 1000 + Math.random() * 9000; // 1-10 seconds in ms
+            // Random wait time 1-20 seconds
+            const totalTime = 1000 + Math.random() * 19000; // 1-20 seconds in ms
             
             // Random catch window (2 second duration) somewhere in the timeline
             const catchWindowStart = Math.random() * (totalTime - 2000); // Ensure 2s window fits
