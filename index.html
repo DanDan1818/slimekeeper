@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlimeHearth v0.438</title>
+    <title>SlimeHearth v0.441</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -104,6 +104,11 @@
         
         #fishing-pond-room {
             background-image: url('./slimehearth-assets/images/pond-background.png');
+        }
+        
+        #fishing-pond-room.active {
+            justify-content: flex-start;
+            padding-top: 40px;
         }
         
         #cooking-menu-room {
@@ -418,6 +423,10 @@
             overflow: hidden;
         }
         
+        #fish-pond-btn:active {
+            transform: scale(0.95);
+        }
+        
         #fishing-bar-river {
             position: absolute;
             left: 0;
@@ -526,7 +535,7 @@
          onclick="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';"
          ontouchend="document.getElementById('title-overlay').style.display='none';document.getElementById('hatch-overlay').style.display='flex';event.preventDefault();">
         <p class="pulse-text" style="font-size:24px;color:rgba(255,255,255,0.9);margin-top:280px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);pointer-events:none;">Tap anywhere to start</p>
-        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.438</div>
+        <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.7);font-size:14px;pointer-events:none;">v0.441</div>
     </div>
     
     <!-- Hatch Screen Overlay (Simple) -->
@@ -612,6 +621,12 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        
+        @keyframes splash {
+            0% { opacity: 0; transform: scale(0.5) translateY(0); }
+            50% { opacity: 1; transform: scale(1.2) translateY(-5px); }
+            100% { opacity: 0; transform: scale(0.8) translateY(-10px); }
         }
         
         .pulse-text {
@@ -710,10 +725,13 @@
             <div class="room" id="fishing-pond-room">
                 <h2>🪷 The Pond</h2>
                 <div id="fishing-game-pond">
-                    <div id="fishing-progress-pond" style="width:200px;height:30px;background:#ddd;border:3px solid #333;border-radius:8px;position:relative;overflow:hidden;">
-                        <div id="fishing-bar-pond" style="width:0%;height:100%;background:#4dd0e1;transition:width 0.1s;"></div>
+                    <div style="position:relative;display:inline-block;">
+                        <div id="fishing-progress-pond" style="width:200px;height:30px;background:#ddd;border:3px solid #333;border-radius:8px;position:relative;overflow:hidden;">
+                            <div id="fishing-bar-pond" style="width:0%;height:100%;background:#4dd0e1;transition:width 0.1s;"></div>
+                        </div>
+                        <div id="pond-splash" style="position:absolute;top:-10px;right:-20px;font-size:24px;display:none;animation:splash 0.6s ease-out;">💦</div>
                     </div>
-                    <button id="fish-pond-btn">🎣 Fish (Hold)</button>
+                    <button id="fish-pond-btn" style="width:80px;height:80px;border-radius:50%;background:#4dd0e1;color:#fff;border:4px solid #fff;font-size:40px;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;padding:0;transition:transform 0.1s;">🎣</button>
                     <div id="fishing-result-pond" style="min-height:30px;font-size:18px;font-weight:bold;"></div>
                 </div>
                 <button id="leave-pond" style="background:#999;">← Leave</button>
@@ -1148,10 +1166,10 @@
         
         <!-- Basket Physics Container -->
         <div class="basket-container" id="basket-container">
-            <div id="basket-bg-image" style="position:absolute !important;bottom:-30px !important;left:-20px !important;width:250px !important;height:250px !important;z-index:5 !important;pointer-events:none;display:block !important;">
+            <div id="basket-bg-image" style="position:absolute !important;bottom:-30px !important;left:-40px !important;width:250px !important;height:250px !important;z-index:5 !important;pointer-events:none;display:block !important;">
                 <img src="./slimehearth-assets/images/bag1.png?v=7" style="width:100%;height:100%;object-fit:contain;" />
             </div>
-            <div id="sell-bag-image" style="position:absolute !important;bottom:-30px !important;right:-70px !important;width:250px !important;height:250px !important;z-index:5 !important;pointer-events:none;display:none !important;">
+            <div id="sell-bag-image" style="position:absolute !important;bottom:-30px !important;right:-100px !important;width:250px !important;height:250px !important;z-index:5 !important;pointer-events:none;display:none !important;">
                 <img src="./slimehearth-assets/images/sellbag1.png?v=1" style="width:100%;height:100%;object-fit:contain;" />
             </div>
             <canvas id="basket-canvas" width="820" height="1200"></canvas>
@@ -2856,42 +2874,118 @@ function stopBasket() {
         let fishingInterval = null;
         let fishingArea = 'pond';
         
+        // ===== POND FISHING: Cast & Hold Timing =====
+        let pondCastActive = false;
+        let pondHolding = false;
+        let pondTimerInterval = null;
+        let pondElapsedTime = 0;
+        let pondCatchStart = 0;
+        let pondCatchEnd = 0;
+        
         function startFishing(area) {
-            fishingArea = area;
-            fishingProgress = 0;
-            updateFishingBar();
+            if (area !== 'pond') return; // Only pond uses this new system
             
-            const btn = document.getElementById('fish-' + area + '-btn');
-            const result = document.getElementById('fishing-result-' + area);
+            if (!pondCastActive && !pondHolding) {
+                // First click/tap - CAST
+                castPondLine();
+            }
+        }
+        
+        function castPondLine() {
+            pondCastActive = true;
+            pondElapsedTime = 0;
             
-            result.textContent = '';
+            const result = document.getElementById('fishing-result-pond');
+            const bar = document.getElementById('fishing-bar-pond');
             
-            fishingInterval = setInterval(() => {
-                fishingProgress += 2;
-                updateFishingBar();
+            result.textContent = '🎣 Casting...';
+            bar.style.width = '0%';
+            bar.style.background = '#4dd0e1';
+            
+            // Random wait time 1-10 seconds
+            const totalTime = 1000 + Math.random() * 9000; // 1-10 seconds in ms
+            
+            // Random catch window (2 second duration) somewhere in the timeline
+            const catchWindowStart = Math.random() * (totalTime - 2000); // Ensure 2s window fits
+            pondCatchStart = catchWindowStart;
+            pondCatchEnd = catchWindowStart + 2000; // 2 second window
+            
+            console.log('Cast! Total time:', totalTime, 'Catch window:', pondCatchStart, '-', pondCatchEnd);
+            
+            // Start timer
+            pondTimerInterval = setInterval(() => {
+                pondElapsedTime += 50;
+                const progress = (pondElapsedTime / totalTime) * 100;
+                bar.style.width = Math.min(100, progress) + '%';
                 
-                if (fishingProgress >= 100) {
-                    completeFishing(true);
+                const splash = document.getElementById('pond-splash');
+                
+                // Check if we're in catch window
+                if (pondElapsedTime >= pondCatchStart && pondElapsedTime <= pondCatchEnd) {
+                    // CATCH WINDOW!
+                    bar.style.background = '#4ade80'; // Green
+                    result.textContent = '💦 NOW! Hold to catch!';
+                    
+                    // Show splash on first frame of catch window
+                    if (splash && splash.style.display === 'none') {
+                        splash.style.display = 'block';
+                        setTimeout(() => { splash.style.display = 'none'; }, 600);
+                    }
+                } else {
+                    bar.style.background = '#4dd0e1'; // Blue
+                    if (splash) splash.style.display = 'none';
+                }
+                
+                // Time's up
+                if (pondElapsedTime >= totalTime) {
+                    clearInterval(pondTimerInterval);
+                    if (!pondHolding) {
+                        result.textContent = '❌ Missed!';
+                        resetPondFishing();
+                    }
                 }
             }, 50);
         }
         
+        function startPondHold() {
+            if (!pondCastActive) return;
+            pondHolding = true;
+        }
+        
         function stopFishing() {
-            if (fishingInterval) {
-                clearInterval(fishingInterval);
-                fishingInterval = null;
-                
-                if (fishingProgress < 100) {
-                    completeFishing(false);
-                }
+            if (!pondCastActive) return;
+            
+            pondHolding = false;
+            clearInterval(pondTimerInterval);
+            
+            // Check if released during catch window
+            if (pondElapsedTime >= pondCatchStart && pondElapsedTime <= pondCatchEnd) {
+                // SUCCESS!
+                completeFishing(true);
+            } else {
+                // MISSED
+                const result = document.getElementById('fishing-result-pond');
+                result.textContent = '❌ Too early/late!';
+                resetPondFishing();
             }
         }
         
+        function resetPondFishing() {
+            pondCastActive = false;
+            pondHolding = false;
+            clearInterval(pondTimerInterval);
+            
+            setTimeout(() => {
+                const result = document.getElementById('fishing-result-pond');
+                const bar = document.getElementById('fishing-bar-pond');
+                result.textContent = '';
+                bar.style.width = '0%';
+                bar.style.background = '#4dd0e1';
+            }, 1500);
+        }
+        
         function updateFishingBar() {
-            const bar = document.getElementById('fishing-bar-' + fishingArea);
-            if (bar) {
-                bar.style.width = fishingProgress + '%';
-            }
+            // Legacy function - kept for compatibility
         }
         
         // River: Timing minigame
@@ -4577,11 +4671,12 @@ function initKitchenGame() {
         // Fishing buttons
         // Pond: hold to fish
         const pondBtn = document.getElementById('fish-pond-btn');
-        pondBtn.addEventListener('mousedown', () => startFishing('pond'));
+        pondBtn.addEventListener('click', () => startFishing('pond'));
+        pondBtn.addEventListener('mousedown', startPondHold);
         pondBtn.addEventListener('mouseup', stopFishing);
         pondBtn.addEventListener('mouseleave', stopFishing);
-        pondBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startFishing('pond'); });
-        pondBtn.addEventListener('touchend', stopFishing);
+        pondBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPondHold(); });
+        pondBtn.addEventListener('touchend', (e) => { e.preventDefault(); stopFishing(); });
         
         // River: hold to start, release to stop
         const riverBtn = document.getElementById('cast-river');
